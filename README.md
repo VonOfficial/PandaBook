@@ -1,73 +1,17 @@
-# React + TypeScript + Vite
+Ссылка на сайт: 
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# О проекте
 
-Currently, two official plugins are available:
+PandaBook - это онлайн-платформа для покупки и чтения книг и манги. Сервис предлагает пользователям уникальную гибридную модель дистрибуции контента через два типа изданий: Стандарт и Премиум.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+# Ключевой функционал и бизнес-логика
 
-## React Compiler
+Каталог и типы контента: Продажа лицензионных электронных книг и манги.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Личная библиотека пользователя: Доступ к купленным электронным книгам предоставляется навсегда (хранение в профиле).
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Система тарифных планов (Издания):
+Стандарт (Standard): Покупка только цифровой (лицензионной электронной) версии книги.
+Премиум (Premium): Цифровая версия + право на получение физического (печатного) экземпляра книги с доставкой по всему миру в любой момент.
+Логика динамического апгрейда (Upgrade): Пользователь, купивший Стандартное издание, имеет возможность в любой момент обновиться до Премиум-версии. При этом стоимость ранее купленной электронной книги вычитается из цены Премиума (пользователь оплачивает только разницу).
+Модуль доставки: Интеграция с логистическими сервисами для отправки печатных изданий по всему миру.
