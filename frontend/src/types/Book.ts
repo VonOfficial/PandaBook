@@ -4,13 +4,34 @@ export type Category = {
   slug: string;
 };
 
+export type BookImage = {
+  id: number;
+  image: string;
+  alt: string;
+  order: number;
+};
+
 export type Book = {
   id: number;
   title: string;
   author: string;
-  price: number; // Мы превратим строку из Django в число на фронтенде
-  rating: number;
-  cover: string | null; // Картинка может быть не загружена
+  publisher: string;
   description: string;
-  category: Category | null; // Теперь это объект из Django, а не массив строк
+
+  price: number;
+  premium_price: number | null;
+  is_premium: boolean;
+
+  pages: number;
+  reading_time: string;
+  age_rating: number | null;
+  reviews_count: number;
+
+  rating: number;
+  cover: string | null;
+
+  category: Category | null;
+  categories: Category[];
+
+  images: BookImage[];
 };

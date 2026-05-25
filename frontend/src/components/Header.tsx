@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 type HeaderProps = {
   search: string;
   onSearchChange: (value: string) => void;
@@ -6,9 +7,9 @@ type HeaderProps = {
 export function Header({ search, onSearchChange }: HeaderProps) {
   return (
     <header className="header">
-      <div className="logo">
+      <Link to="/" className="logo">
         <img src="/logo.png" alt="БУКБУК" />
-      </div>
+      </Link>
 
       <div className="search">
         <svg className="search__icon" viewBox="0 0 24 24" aria-hidden="true">

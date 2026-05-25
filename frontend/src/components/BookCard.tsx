@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { Book } from "../types/Book";
 
 type BookCardProps = {
@@ -14,8 +15,12 @@ function cutText(text: string, maxLength: number) {
 
 export function BookCard({ book }: BookCardProps) {
   return (
-    <article className="book-card">
-      <img className="book-card__image" src={book.cover} alt={book.title} />
+    <Link to={`/books/${book.id}`} className="book-card">
+      <img
+        className="book-card__image"
+        src={book.cover || "/no-cover.png"}
+        alt={book.title}
+      />
 
       <div className="book-card__info">
         <div className="book-card__top">
@@ -23,12 +28,13 @@ export function BookCard({ book }: BookCardProps) {
             <span className="book-card__star">★</span>
             <span>{book.rating}</span>
           </span>
+
           <span className="book-card__price">{book.price} ₽</span>
         </div>
 
         <h3 className="book-card__title">{cutText(book.title, 18)}</h3>
-        <p className="book-card__author">{cutText(book.author, 13)}</p>
+        <p className="book-card__author">{cutText(book.author, 15)}</p>
       </div>
-    </article>
+    </Link>
   );
 }
