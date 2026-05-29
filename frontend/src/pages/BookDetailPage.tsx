@@ -1,3 +1,7 @@
+import { useCart } from "../context/CartContext";
+import { AddToCartModal } from "../components/AddToCartModal";
+import type { CartEditionType, CartItem, CartProductType } from "../types/Cart";
+
 import {
   useCallback,
   useEffect,
@@ -7,7 +11,7 @@ import {
   type PointerEvent,
   type MouseEvent,
 } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import type { Book, Category } from "../types/Book";
 import { BookCard } from "../components/BookCard";
@@ -61,14 +65,46 @@ function getReviewsText(count: number) {
   return `${count}`;
 }
 
-function PurchaseBlock({ title, price }: { title: string; price: number }) {
+function PurchaseBlock({
+  title,
+  price,
+  badgeText,
+  isPremium = false,
+  isInCart = false,
+  onAddToCart,
+  onOpenCart,
+}: {
+  title: string;
+  price: number;
+  badgeText?: string;
+  isPremium?: boolean;
+  isInCart?: boolean;
+  onAddToCart: () => void;
+  onOpenCart: () => void;
+}) {
   return (
-    <div className="purchase-block">
-      <span className="purchase-block__title">Купить {title}</span>
+    <div className="purchase-item">
+      {badgeText && <div className="purchase-badge">{badgeText}</div>}
 
-      <div className="purchase-block__right">
-        <span className="purchase-block__price">{price} ₽</span>
-        <button className="purchase-block__button">В корзину</button>
+      <div
+        className={
+          isPremium
+            ? "purchase-block purchase-block--premium"
+            : "purchase-block"
+        }
+      >
+        <span className="purchase-block__title">Купить {title}</span>
+
+        <div className="purchase-block__right">
+          <span className="purchase-block__price">{price} ₽</span>
+
+          <button
+            className="purchase-block__button"
+            onClick={isInCart ? onOpenCart : onAddToCart}
+          >
+            {isInCart ? "В корзине" : "В корзину"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -76,6 +112,9 @@ function PurchaseBlock({ title, price }: { title: string; price: number }) {
 
 export function BookDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+
+  const { items, addItem } = useCart();
 
   const [book, setBook] = useState<Book | null>(null);
   const [allBooks, setAllBooks] = useState<Book[]>([]);
@@ -94,6 +133,9 @@ export function BookDetailPage() {
 
   const [isScrollbarDragging, setIsScrollbarDragging] = useState(false);
   const [autoplayResetKey, setAutoplayResetKey] = useState(0);
+
+  const [addedCartItem, setAddedCartItem] = useState<CartItem | null>(null);
+  const [cartErrorMessage, setCartErrorMessage] = useState("");
 
   const thumbnailsRef = useRef<HTMLDivElement | null>(null);
   const scrollTrackRef = useRef<HTMLDivElement | null>(null);
@@ -627,6 +669,59 @@ export function BookDetailPage() {
     selectImage(nextIndex, "smooth");
   }
 
+  function getCartProductType(bookItem: Book): CartProductType {
+    const bookGenres = getBookGenres(bookItem);
+
+    const isManga = bookGenres.some((genre) => {
+      return genre.name.toLowerCase().includes("манга");
+    });
+
+    return isManga ? "manga" : "book";
+  }
+
+  function handleAddToCart(editionType: CartEditionType) {
+    if (!book) {
+      return;
+    }
+
+    const isPremiumEdition = editionType === "premium";
+
+    if (isPremiumEdition && !book.premium_price) {
+      return;
+    }
+
+    const cartItem: CartItem = {
+      id: `${book.id}-${editionType}`,
+      bookId: book.id,
+
+      title: isPremiumEdition ? `${book.title} — Premium Edition` : book.title,
+
+      baseTitle: book.title,
+
+      author: book.author,
+      cover: book.cover,
+      rating: book.rating,
+
+      price: isPremiumEdition ? book.premium_price || 0 : book.price,
+
+      editionType,
+      productType: getCartProductType(book),
+
+      badgeText: isPremiumEdition ? "Бумажный экземпляр" : undefined,
+    };
+
+    const result = addItem(cartItem);
+
+    if (!result.success) {
+      setCartErrorMessage(result.message);
+      setAddedCartItem(null);
+      return;
+    }
+
+    setAddedCartItem(cartItem);
+    setCartErrorMessage("");
+  }
+
   function showNextImage() {
     if (galleryImages.length === 0) {
       return;
@@ -635,6 +730,18 @@ export function BookDetailPage() {
     const nextIndex = (activeImageIndex + 1) % galleryImages.length;
 
     selectImage(nextIndex, "smooth");
+  }
+
+  const isStandardEditionInCart = items.some(
+    (item) => item.id === `${book.id}-standard`,
+  );
+
+  const isPremiumEditionInCart = items.some(
+    (item) => item.id === `${book.id}-premium`,
+  );
+
+  function openCartPage() {
+    navigate("/cart");
   }
 
   return (
@@ -752,12 +859,23 @@ export function BookDetailPage() {
           </div>
 
           <div className="purchase-list">
-            <PurchaseBlock title={book.title} price={book.price} />
+            <PurchaseBlock
+              title={book.title}
+              price={book.price}
+              isInCart={isStandardEditionInCart}
+              onAddToCart={() => handleAddToCart("standard")}
+              onOpenCart={openCartPage}
+            />
 
             {book.is_premium && book.premium_price && (
               <PurchaseBlock
                 title={`${book.title} — Premium Edition`}
                 price={book.premium_price}
+                badgeText="Бумажный экземпляр"
+                isPremium
+                isInCart={isPremiumEditionInCart}
+                onAddToCart={() => handleAddToCart("premium")}
+                onOpenCart={openCartPage}
               />
             )}
           </div>
@@ -893,6 +1011,19 @@ export function BookDetailPage() {
             ›
           </button>
         </div>
+      )}
+      {addedCartItem && (
+        <AddToCartModal
+          item={addedCartItem}
+          onClose={() => setAddedCartItem(null)}
+        />
+      )}
+
+      {cartErrorMessage && (
+        <AddToCartModal
+          errorMessage={cartErrorMessage}
+          onClose={() => setCartErrorMessage("")}
+        />
       )}
     </main>
   );
